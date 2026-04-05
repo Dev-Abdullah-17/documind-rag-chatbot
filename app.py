@@ -2,7 +2,7 @@ import streamlit as st
 import time
 from pathlib import Path
 
-# ─── Page Config ─────────────────────────────────────────────────────────────
+# Page Config
 st.set_page_config(
     page_title="DocuMind – RAG Chatbot",
     page_icon="🧠",
@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ─── Custom CSS ──────────────────────────────────────────────────────────────
+# Custom CSS
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -109,7 +109,7 @@ html, body, [class*="css"] {
 """, unsafe_allow_html=True)
 
 
-# ─── Session State ────────────────────────────────────────────────────────────
+# Session State
 def init_state():
     defaults = {
         "messages": [],
@@ -128,14 +128,14 @@ def init_state():
 init_state()
 
 
-# ─── Cached Libs ──────────────────────────────────────────────────────────────
+# Cached Libs 
 @st.cache_resource(show_spinner=False)
 def load_embeddings():
     from langchain_community.embeddings import HuggingFaceEmbeddings
     return HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
 
-# ─── Process PDFs ────────────────────────────────────────────────────────────
+# Process PDFs 
 def process_pdfs(uploaded_files):
     from langchain_community.document_loaders import PyPDFLoader
     from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -169,7 +169,7 @@ def process_pdfs(uploaded_files):
     return len(chunks), names
 
 
-# ─── Get LLM ─────────────────────────────────────────────────────────────────
+# Get LLM 
 def get_llm():
     choice = st.session_state.model_choice
     api_key = st.session_state.api_key
@@ -189,7 +189,7 @@ def get_llm():
         return ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=temp, google_api_key=api_key)
 
 
-# ─── Stream Answer ───────────────────────────────────────────────────────────
+# Stream Answer
 def stream_answer(question: str):
     vs = st.session_state.vectorstore
     k = st.session_state.top_k
@@ -240,7 +240,7 @@ ANSWER:"""
             time.sleep(0.01)
         stream_placeholder.markdown(full_response)
     except Exception as e:
-        full_response = f"⚠️ Error: {str(e)}"
+        full_response = f" Error: {str(e)}"
         stream_placeholder.warning(full_response)
 
     return full_response, sources
@@ -248,11 +248,11 @@ ANSWER:"""
 
 # ─── SIDEBAR ─────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🧠 DocuMind")
+    st.markdown("# DocuMind")
     st.markdown("*RAG-Powered Document Chat*")
     st.markdown("---")
 
-    st.markdown("### ⚙️ Model Settings")
+    st.markdown("# Model Settings")
     st.session_state.model_choice = st.selectbox(
         "LLM",
         ["groq-llama3", "groq-llama3-8b", "openai-gpt4o-mini", "gemini-flash"],
@@ -301,7 +301,7 @@ with st.sidebar:
         with st.spinner("Embedding documents..."):
             try:
                 n_chunks, names = process_pdfs(uploaded_files)
-                st.success(f"✅ Indexed {n_chunks} chunks from {len(names)} file(s)")
+                st.success(f" Indexed {n_chunks} chunks from {len(names)} file(s)")
             except Exception as e:
                 st.error(f"Error: {e}")
 
