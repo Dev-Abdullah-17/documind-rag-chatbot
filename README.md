@@ -12,7 +12,7 @@
 
 ## 🚀 Live Demo
 
-> 🔗 **[Try it here → Live Demo](https://etdrbz9c79erdsjwmfsstm.streamlit.app/)**
+> 🔗 **[Try it here → Live Demo](https://rag-chatbotapp.streamlit.app/)**
 
 ---
 
