@@ -95,7 +95,7 @@
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/YOUR_USERNAME/documind-rag-chatbot
+git clone https://github.com/Dev-Abdullah-17/documind-rag-chatbot
 cd documind-rag-chatbot
 ```
 
