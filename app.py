@@ -45,30 +45,39 @@ html, body, [class*="css"] {
 
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+.stDeployButton {display: none !important;}
+[data-testid="stToolbarActions"] {display: none !important;}
 
-/* Fix: don't hide the whole header — that also hides the sidebar
-   reopen arrow. Instead make the header itself invisible/transparent
-   while explicitly keeping the sidebar-toggle control visible. */
+/* Fix: never hide/shrink the header itself and never touch its
+   `display`/`overflow` — that's what was clipping the sidebar
+   reopen arrow off-screen. Instead just recolor it so it blends
+   with the dark theme, and hide only the deploy/menu clutter. */
 header[data-testid="stHeader"] {
-    background: transparent !important;
-    box-shadow: none !important;
-    height: 3.2rem;
+    background: rgba(13, 10, 20, 0.7) !important;
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
 }
-[data-testid="stToolbar"] {
-    visibility: hidden;
-}
+header[data-testid="stHeader"] svg { fill: var(--accent) !important; }
+header[data-testid="stHeader"] button { color: var(--accent) !important; }
+
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"] {
     visibility: visible !important;
-    display: flex !important;
-    color: var(--accent) !important;
     opacity: 1 !important;
-    z-index: 999999 !important;
 }
 [data-testid="stSidebarCollapsedControl"] svg,
 [data-testid="collapsedControl"] svg {
-    color: var(--accent) !important;
     fill: var(--accent) !important;
+}
+
+/* The fixed bottom bar that wraps the chat input also ships with
+   its own light background by default — recolor it too. */
+[data-testid="stBottomBlockContainer"],
+[data-testid="stBottom"] {
+    background: transparent !important;
+}
+[data-testid="stChatInput"] textarea::placeholder {
+    color: var(--text-muted) !important;
 }
 
 .block-container {padding-top: 1.2rem; padding-bottom: 6rem; max-width: 900px;}
@@ -220,6 +229,7 @@ def init_state():
         "doc_names": [],
         "total_chunks": 0,
         "api_key": "",
+        "sidebar_visible": True,
         "model_choice": "groq-llama3",
         "temperature": 0.3,
         "top_k": 4,
@@ -229,6 +239,15 @@ def init_state():
             st.session_state[k] = v
 
 init_state()
+
+# ── Manual sidebar visibility (does not rely on Streamlit's native
+#    collapse arrow, whose testid changes across versions) ──
+if not st.session_state.sidebar_visible:
+    st.markdown("""
+    <style>
+    [data-testid="stSidebar"] { display: none !important; }
+    </style>
+    """, unsafe_allow_html=True)
 
 
 # Cached Libs
@@ -359,6 +378,10 @@ with st.sidebar:
     <div class="tagline" style="margin-bottom:0.6rem;">RAG-Powered Document Chat</div>
     """, unsafe_allow_html=True)
 
+    if st.button("◀ Hide sidebar", use_container_width=True, key="hide_sidebar_btn"):
+        st.session_state.sidebar_visible = False
+        st.rerun()
+
     st.markdown('<div class="side-label">Model Settings</div>', unsafe_allow_html=True)
     st.session_state.model_choice = st.selectbox(
         "LLM",
@@ -449,20 +472,44 @@ model_display = {
     "gemini-flash":      "Gemini 1.5 Flash",
 }[st.session_state.model_choice]
 
-st.markdown(f"""
-<div class="app-header">
-    <div class="left">
-        <div class="orb"></div>
-        <div>
-            <div class="logo">DocuMind</div>
-            <div class="tagline">Context-aware document intelligence · RAG + LangChain</div>
+header_left, header_right = st.columns([0.06, 0.94]) if not st.session_state.sidebar_visible else (None, None)
+
+if not st.session_state.sidebar_visible:
+    with header_left:
+        st.write("")
+        if st.button("☰", key="show_sidebar_btn", help="Show sidebar"):
+            st.session_state.sidebar_visible = True
+            st.rerun()
+    with header_right:
+        st.markdown(f"""
+        <div class="app-header">
+            <div class="left">
+                <div class="orb"></div>
+                <div>
+                    <div class="logo">DocuMind</div>
+                    <div class="tagline">Context-aware document intelligence · RAG + LangChain</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="model-pill"><span class="status-dot"></span>{model_display}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+else:
+    st.markdown(f"""
+    <div class="app-header">
+        <div class="left">
+            <div class="orb"></div>
+            <div>
+                <div class="logo">DocuMind</div>
+                <div class="tagline">Context-aware document intelligence · RAG + LangChain</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="model-pill"><span class="status-dot"></span>{model_display}</div>
         </div>
     </div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <div class="model-pill"><span class="status-dot"></span>{model_display}</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # Welcome / hero state
 if not st.session_state.vectorstore:
