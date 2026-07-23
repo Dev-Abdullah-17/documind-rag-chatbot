@@ -12,13 +12,14 @@
 
 ## 🚀 Live Demo
 
-> 🔗 **[Try it here → Live Demo](https://rag-chatbotapp.streamlit.app/)**
+> 🔗 **[Try it here → Live Demo]https://rag-chatbotapp.streamlit.app/**
 
 ---
 
 ## 📸 Preview
 
-![DocuMind Screenshot](assets/screenshot.png)
+![DocuMind Screenshot]()
+<img width="1917" height="916" alt="image" src="https://github.com/user-attachments/assets/50d83ed4-f930-4d0e-8887-93e511f5d476" />
 
 ---
 
